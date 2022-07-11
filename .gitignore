@@ -1,0 +1,44 @@
+# Dependency directory
+node_modules
+
+# Editors
+.idea
+*.iml
+.vscode/settings.json
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Ignore built ts files
+dist/**/*
+
+
+# dependencies
+/node_modules
+
+# IDEs and editors
+/.idea
+/.vscode
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# log files
+/log/*.log
+
+/*.nyc_output
+/coverage
+/dist
+
+# env file
+/*.env
+
+# sonarlint
+/.sonarlint
+
+# do not commit configuration files
+/resources/configuration.yaml
+/resources/migrations/database.json
+gcloud-bucket.json
