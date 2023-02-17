@@ -15,6 +15,8 @@ jobs:
       contents: read
       id-token: write
 
+    runs-on: ubuntu-latest
+
     steps:
       # https://github.com/marketplace/actions/checkout
       - name: Checkout repository
