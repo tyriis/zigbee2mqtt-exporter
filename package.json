@@ -1,6 +1,6 @@
 {
   "name": "zigbee2mqtt-exporter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "prometheus exporter for zigbee2mqtt data",
   "main": "server.js",
   "scripts": {
