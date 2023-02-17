@@ -13,10 +13,6 @@ RUN npm run build
 # Actual build
 FROM node:16-alpine
 
-LABEL name=tyriis/mqtt-exporter
-LABEL version=0.1
-LABEL maintainer=nils.mueller
-
 COPY --from=build /app/dist /app/dist
 
 WORKDIR /app
