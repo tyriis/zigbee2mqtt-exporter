@@ -11,7 +11,7 @@ app.set("port", process.env.PORT || 3000)
 app.use(logger("dev"))
 
 app.use("/metrics", (req, res) => {
-  const ws = new WebSocket(process.env.ZIGBEE2MQTT_WS || "ws://localhost:8080/api")
+  const ws = new WebSocket(process.env.ZIGBEE2MQTT_WS || "ws://127.0.0.1:8080/api")
   const now = Date.now()
   let devices: string[] = []
   let body: string
