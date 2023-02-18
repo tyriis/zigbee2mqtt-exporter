@@ -27,4 +27,4 @@ RUN npm ci --production
 # switch to user node (uid=1000)
 USER node
 
-CMD [ "npm", "run", "start"]
+CMD [ "npm", "run", "service"]

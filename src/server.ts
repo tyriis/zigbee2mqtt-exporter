@@ -29,6 +29,9 @@ function onError(error: NodeJS.ErrnoException) {
 
 function onListening() {
   const addr = server.address()
+  if (addr === null) {
+    throw new Error(`server address is null!`)
+  }
   const bind = typeof addr === "string" ? `pipe ${addr}` : `port ${addr.port}`
   console.log(`Listening on ${bind}`)
 }

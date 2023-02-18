@@ -20,8 +20,8 @@ app.use("/metrics", (req, res) => {
   const deviceData: { [key: string]: number } = {}
 
   ws.on("error", (err) => {
-    // console.log(err.stack);
     if (done !== true) {
+      console.log(err.stack)
       res.sendStatus(500)
     }
   })
