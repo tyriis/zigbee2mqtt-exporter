@@ -35,6 +35,7 @@
     "packages:eslint",
     "workarounds:typesNodeVersioning",
     "github>whitesource/merge-confidence:beta",
+    "github>tyriis/renovate-config//github-actions/automerge-build-push-action-v5.json5",
   ],
   semanticCommits: "auto",
   stopUpdatingLabel: "stop-updating",
