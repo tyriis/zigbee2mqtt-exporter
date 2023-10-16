@@ -1,7 +1,7 @@
 # Multi stage build
 #
 # npm run build
-FROM node:20.8.0-alpine AS build
+FROM node:20.8.1-alpine AS build
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ RUN npm ci
 RUN npm run build
 
 # Actual build
-FROM node:20.8.0-alpine
+FROM node:20.8.1-alpine
 
 COPY --from=build /app/dist /app/dist
 
