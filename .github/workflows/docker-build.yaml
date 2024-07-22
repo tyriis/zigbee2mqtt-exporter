@@ -41,7 +41,7 @@ jobs:
       # https://github.com/marketplace/actions/docker-login
       - name: Setup GHCR
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v3.2.0
+        uses: docker/login-action@v3.3.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
