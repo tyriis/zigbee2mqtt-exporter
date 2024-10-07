@@ -26,7 +26,7 @@
     "@types/ws": "8.5.12",
     "@typescript-eslint/eslint-plugin": "8.8.0",
     "@typescript-eslint/parser": "8.8.0",
-    "eslint": "9.11.1",
+    "eslint": "9.12.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-import": "2.31.0",
     "prettier": "3.3.3",
