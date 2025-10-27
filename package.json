@@ -20,7 +20,7 @@
     "ws": "8.18.3"
   },
   "devDependencies": {
-    "@types/express": "5.0.3",
+    "@types/express": "5.0.4",
     "@types/morgan": "1.9.10",
     "@types/node": "22.18.12",
     "@types/ws": "8.18.1",
