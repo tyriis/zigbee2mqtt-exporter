@@ -15,7 +15,7 @@
   "author": "Nils Müller",
   "license": "MIT",
   "dependencies": {
-    "express": "4.22.2",
+    "express": "4.22.3",
     "morgan": "1.12.1",
     "ws": "8.21.3"
   },
