@@ -1,7 +1,7 @@
 import { WebSocket } from 'ws'
 import { buildApp } from '#root/app'
 import type { Logger } from '#root/application/logger'
-import { loadConfig } from '#root/config'
+import { loadConfig, type Config } from '#root/config'
 import {
   createWebSocketDeviceSource,
   type SocketLike,
@@ -33,7 +33,14 @@ const describeError = (error: unknown): string => {
   return 'unknown error'
 }
 
-const config = loadConfig(process.env)
+const config = ((): Config => {
+  try {
+    return loadConfig(process.env)
+  } catch (error) {
+    console.error(describeError(error))
+    process.exit(1)
+  }
+})()
 
 const app = buildApp({
   source: createWebSocketDeviceSource({
