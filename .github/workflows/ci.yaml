@@ -1,0 +1,88 @@
+---
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      # https://github.com/marketplace/actions/checkout
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+
+      # https://github.com/marketplace/actions/setup-pnpm
+      # No `version:` input on purpose: the action reads `packageManager`
+      # from package.json, so the pin lives in exactly one place.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6.1.0
+
+      # https://github.com/marketplace/actions/setup-node-js-environment
+      # Must come after pnpm/action-setup: restoring the pnpm cache needs
+      # pnpm already on PATH. The version comes from `.nvmrc` so CI, the
+      # Dockerfile and `engines` cannot drift apart.
+      - name: Setup Node.js
+        uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test with coverage
+        run: pnpm test:coverage
+
+      # https://github.com/marketplace/actions/upload-a-build-artifact
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          if-no-files-found: ignore
+
+      - name: Build
+        run: pnpm build
+
+      # https://github.com/marketplace/actions/docker-setup-buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.4.1
+
+      # Proves the image builds before a tag exists, so a broken Dockerfile
+      # never reaches the publish workflow. Nothing is pushed.
+      # https://github.com/marketplace/actions/build-and-push-docker-images
+      # `type=gha` is scoped per ref, so the scope is named explicitly: the
+      # tag-push build needs the cache that this branch-scoped run produced.
+      - name: Smoke build the image
+        uses: docker/build-push-action@v7.4.0
+        with:
+          context: .
+          push: false
+          tags: ci-check:local
+          cache-from: type=gha,scope=buildkit
+          cache-to: type=gha,mode=max,scope=buildkit
