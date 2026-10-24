@@ -42,3 +42,9 @@ Thumbs.db
 /resources/configuration.yaml
 /resources/migrations/database.json
 gcloud-bucket.json
+
+# test coverage
+coverage/
+
+# typescript build info
+*.tsbuildinfo

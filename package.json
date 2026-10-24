@@ -1,35 +1,54 @@
 {
   "name": "zigbee2mqtt-exporter",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "prometheus exporter for zigbee2mqtt data",
-  "main": "server.js",
-  "scripts": {
-    "start": "npm run serve",
-    "build": "npm run build-ts",
-    "service": "node dist/server.js",
-    "build-ts": "tsc",
-    "watch-ts": "tsc -w",
-    "lint": "eslint src/*.ts",
-    "typecheck": "tsc --noEmit"
-  },
   "author": "Nils Müller",
   "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "packageManager": "pnpm@12.15.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "imports": {
+    "#root/*": {
+      "development": "./src/*.ts",
+      "default": "./dist/*.js"
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "dev": "NODE_OPTIONS=--conditions=development tsx watch src/index.ts",
+    "start:dev": "NODE_OPTIONS=--conditions=development tsx src/index.ts",
+    "build": "pnpm run clean && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "RUN_LIVE_INTEGRATION=1 vitest run --config vitest.integration.config.ts",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
   "dependencies": {
-    "express": "4.22.3",
-    "morgan": "1.12.1",
+    "fastify": "5.12.7",
     "ws": "8.22.0"
   },
   "devDependencies": {
-    "@types/express": "5.0.6",
-    "@types/morgan": "1.9.10",
     "@types/node": "24.19.2",
     "@types/ws": "8.18.2",
     "@typescript-eslint/eslint-plugin": "8.72.0",
     "@typescript-eslint/parser": "8.72.0",
-    "eslint": "9.39.5",
+    "@vitest/coverage-v8": "5.0.5",
+    "eslint": "10.13.0",
     "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-import": "2.32.0",
+    "mqtt": "5.16.1",
     "prettier": "3.9.10",
-    "typescript": "5.9.3"
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
   }
 }
