@@ -74,5 +74,29 @@
       matchManagers: ["github-actions"],
       labels: ["dev", "github-actions"],
     },
+    {
+      // The Node.js runtime is pinned in four places: both Dockerfile stages,
+      // .nvmrc and .mise.toml (CI reads .nvmrc via node-version-file). Group
+      // them so one PR moves all of them to the same major.
+      //
+      // ignoreUnstable is what makes that PR complete: the docker datasource
+      // knows no stability, but the node versioning Renovate uses for .nvmrc,
+      // .mise.toml and engines only accepts a major once its LTS date has
+      // passed (v26 LTS is 2026-10-28). Left at its default, the image bumps
+      // alone and the other three follow weeks later.
+      //
+      // engines.node is deliberately not version-bumped: it is a compatibility
+      // floor, not the version we run. ">=24.0.0" stays truthful while the code
+      // runs on 24, and only joins this branch once the floor stops satisfying
+      // the target.
+      description: "Group the Node.js runtime pins into one PR per major",
+      groupName: "Node.js",
+      groupSlug: "nodejs",
+      matchDatasources: ["docker", "node-version"],
+      matchPackageNames: ["node"],
+      // :separateMultipleMajorReleases is inherited from the presets above.
+      separateMajorMinor: false,
+      ignoreUnstable: false,
+    },
   ],
 }
