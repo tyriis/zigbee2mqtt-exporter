@@ -1,8 +1,8 @@
 # zigbee2mqtt-exporter — modernization, layers, unit tests, CI
 
-Status: implemented (2026-10-25)
+Status: merged in #963, released as `v0.4.0` (2026-10-25)
 Date: 2026-10-25
-Branch: `feature/modernize-exporter`
+Branches: `feature/modernize-exporter` → `main`, release line `release/0.4.0`
 
 ## Intent
 
@@ -414,3 +414,14 @@ Known follow-ups, not done here:
 - No cancellation plumbing: a scrape that outlives its deadline keeps a timer
   and socket until the deadline fires, which is bounded and harmless.
 - Nothing alerts on the exporter being down; that is a `home-ops` concern.
+
+## Release
+
+| Item | Value |
+| --- | --- |
+| Version | `0.4.0` (`package.json`) |
+| Branch | `release/0.4.0`, cut from `main` after #963 |
+| Pre-release | `v0.3.0-rc.1` (retired), `v0.4.0-rc.1` (published from `c45914c`) |
+| Image | `ghcr.io/tyriis/zigbee2mqtt-exporter:v0.4.0`, `linux/amd64` + `linux/arm64`, signed with cosign v3 keyless |
+| OCI metadata | `org.opencontainers.image.{source,description,licenses}` on both the image config and the index annotations, which is what GHCR shows for a multi-arch package |
+| Deploy | no `home-ops` change beyond the image tag; `PORT` 3000, `/metrics`, `ZIGBEE2MQTT_WS` unchanged |
