@@ -38,8 +38,8 @@ it.
 - No caching of snapshots, no connection reuse across scrapes, no retry or
   backoff, no `/health`. The exporter stays stateless per scrape.
 - No change of data source. The exporter keeps reading the Zigbee2MQTT
-  websocket API (`ZIGBEE2MQTT_WS`). `mqtt.techtales.io` is used read-only by
-  one opt-in test, never by the running service.
+  websocket API (`ZIGBEE2MQTT_WS`); nothing in the running service or the test
+  suite touches an MQTT broker.
 - No `home-ops` change. Port, path and metric name stay put, so the deployed
   `DeviceNotSeen` alert keeps working untouched.
 
@@ -272,17 +272,11 @@ never touch the network.
 Coverage thresholds 100 for lines/functions/branches/statements, excluding
 `src/index.ts` (process bootstrap). CI fails below that.
 
-One opt-in integration test, `integration/zigbee2mqtt-broker.test.ts`:
-
-- Runs only with `RUN_LIVE_INTEGRATION=1`; skipped otherwise and in CI.
-- Connects to `mqtt.techtales.io:1883` **read-only**, subscribes
-  `zigbee2mqtt/bridge/devices`, takes the retained payload.
-- Feeds that real payload through the collector and asserts at least one
-  non-coordinator device is seeded.
-- Never publishes. If no payload arrives within 10s, it skips rather than
-  fails, so a flaky LAN cannot redden the suite.
-
-Purpose: prove the parser survives real Zigbee2MQTT payloads.
+An early draft also carried an opt-in integration test that read a retained
+`bridge/devices` payload from a broker. It was dropped: the runtime speaks the
+Zigbee2MQTT websocket, so a broker dependency in the test suite described a
+data path the exporter does not have. Payload shapes were verified once, by
+hand, and are recorded under "Payload facts" above.
 
 ## Tooling changes
 
@@ -354,9 +348,8 @@ New `.github/workflows/ci.yaml`:
 3. `infrastructure` (parsing, adapter, formatter) with their tests.
 4. `http`, `config`, `app`, `index` with tests; delete `src/app.ts` and
    `src/server.ts`.
-5. Opt-in broker test.
-6. CI workflows, Dockerfile, pre-commit, README, version bump.
-7. Verify: `pnpm lint`, `pnpm typecheck`, `pnpm test:coverage` at 100%,
+5. CI workflows, Dockerfile, pre-commit, README, version bump.
+6. Verify: `pnpm lint`, `pnpm typecheck`, `pnpm test:coverage` at 100%,
    `pnpm build`, `docker build`, and a side-by-side `/metrics` compare against
    v0.2.7 output for the same fixture.
 
@@ -364,8 +357,8 @@ New `.github/workflows/ci.yaml`:
 
 1. TypeScript 6.0.3 rather than 7.0.2 — toolchain compatibility.
 2. Pre-commit stays, lefthook is not added — two hook managers conflict.
-3. Live broker test is opt-in and skips on timeout — CI must not depend on a
-   LAN broker.
+3. No broker or network dependency anywhere in the suite — the tests fake the
+   socket, so CI and local runs behave identically.
 4. Deadline answers `504` rather than a partial or empty `200`: when the socket
    is wedged there is nothing honest to return, and a `200` carrying only the
    HELP/TYPE lines would report the exporter as healthy while exporting no
@@ -411,7 +404,7 @@ Evidence collected while implementing:
 | Deadline path | `504` in 1.01s with `SCRAPE_DEADLINE_MS=1000` |
 | Unreachable source | `500` in 0.01s |
 | SIGTERM | process exits |
-| `pnpm test:integration` against `mqtt.techtales.io` | passes, read-only, never publishes |
+| Live broker fixture test | added, then removed on request — the runtime has no MQTT path |
 | `docker build` + `docker run` against the fake bridge | image serves correct exposition |
 
 Known follow-ups, not done here:

@@ -63,20 +63,14 @@ pnpm start           # run the compiled exporter
 
 ## Testing
 
-The unit tests are offline and use fake sockets, so they never touch a broker
-or the Zigbee2MQTT instance.
-
-One integration test is opt-in and read-only:
+The tests are offline: the websocket, the clock and the Zigbee2MQTT payloads
+are faked, so nothing here needs a broker, a Zigbee2MQTT instance or a network
+connection.
 
 ```sh
-pnpm test:integration
+pnpm test            # unit tests
+pnpm test:coverage   # unit tests with the 100% coverage gate
 ```
-
-It connects to `mqtt.techtales.io:1883`, subscribes to the retained
-`zigbee2mqtt/bridge/devices` payload and feeds that real payload through the
-parser. It never publishes, and it skips rather than fails if no payload
-arrives within 10 seconds. It is excluded from `pnpm test` and never runs in
-CI.
 
 ## Known behaviour
 
