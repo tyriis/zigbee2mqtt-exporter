@@ -15,6 +15,3 @@ YAML_YAMLLINT_CONFIG_FILE: .yamllint.yaml
 YAML_PRETTIER_FILTER_REGEX_EXCLUDE: (.*\.sops\..*)
 YAML_PRETTIER_CONFIG_FILE: .prettierrc.yaml
 JSON_PRETTIER_CONFIG_FILE: .prettierrc.yaml
-# Design records are engineering notes, not user documentation; proselint's
-# typography rules fight code identifiers and bug labels.
-SPELL_PROSELINT_FILTER_REGEX_EXCLUDE: (docs/)

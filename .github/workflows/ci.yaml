@@ -27,15 +27,10 @@ jobs:
         uses: actions/checkout@v7.0.1
 
       # https://github.com/marketplace/actions/setup-pnpm
-      # No `version:` input on purpose: the action reads `packageManager`
-      # from package.json, so the pin lives in exactly one place.
       - name: Setup pnpm
         uses: pnpm/action-setup@v6.1.0
 
       # https://github.com/marketplace/actions/setup-node-js-environment
-      # Must come after pnpm/action-setup: restoring the pnpm cache needs
-      # pnpm already on PATH. The version comes from `.nvmrc` so CI, the
-      # Dockerfile and `engines` cannot drift apart.
       - name: Setup Node.js
         uses: actions/setup-node@v7.1.0
         with:
@@ -73,11 +68,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4.4.1
 
-      # Proves the image builds before a tag exists, so a broken Dockerfile
-      # never reaches the publish workflow. Nothing is pushed.
       # https://github.com/marketplace/actions/build-and-push-docker-images
-      # `type=gha` is scoped per ref, so the scope is named explicitly: the
-      # tag-push build needs the cache that this branch-scoped run produced.
       - name: Smoke build the image
         uses: docker/build-push-action@v7.4.0
         with:

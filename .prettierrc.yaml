@@ -11,5 +11,6 @@ overrides:
   - files:
       - "*.yml"
       - "*.yaml"
+      - "*.json5"
     options:
       singleQuote: false

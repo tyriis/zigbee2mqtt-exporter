@@ -2,7 +2,7 @@
   "name": "zigbee2mqtt-exporter",
   "version": "0.3.0",
   "description": "prometheus exporter for zigbee2mqtt data",
-  "author": "Nils M\u00fcller",
+  "author": "Nils Müller",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",

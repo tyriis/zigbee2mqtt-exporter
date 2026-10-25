@@ -11,9 +11,11 @@ repos:
   - repo: local
     hooks:
       - id: prettier
-        name: pnpm exec prettier
-        entry: pnpm exec prettier --write
-        language: system
+        name: prettier
+        entry: prettier --write
+        language: node
+        additional_dependencies:
+          - prettier@3.9.10
         types_or:
           - javascript
           - jsx

@@ -17,7 +17,6 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  # Never publish from a red tree: the reusable workflow must pass first.
   ci:
     uses: ./.github/workflows/ci.yaml
 
@@ -31,7 +30,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7.0.1
 
-      # Workaround: https://github.com/docker/build-push-action/issues/461
       # https://github.com/marketplace/actions/docker-setup-qemu
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v4.4.0
@@ -48,9 +46,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Defaults already give semver tags (1.2.3, 1.2, 1) plus `latest` for
-      # a non-prerelease `v*.*.*` tag, and nothing but the prerelease tag for
-      # `v*.*.*-*`. No extra rules needed.
       # https://github.com/marketplace/actions/docker-metadata-action
       - name: Extract Docker metadata
         id: meta
@@ -73,17 +68,12 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      # cosign v3 keyless: no COSIGN_EXPERIMENTAL, but `--yes` is mandatory
-      # because the privacy-statement prompt cannot be answered on a runner.
-      # The installer's own default is v3.0.6, hence the explicit release.
       # https://github.com/marketplace/actions/cosign-installer
       - name: Setup cosign
         uses: sigstore/cosign-installer@v4.1.2
         with:
           cosign-release: v3.1.4
 
-      # Sign by digest, never by tag: a tag can be moved after the fact.
-      # The signature goes into the registry, next to the image it covers.
       # https://github.com/sigstore/cosign
       - name: Sign the published Docker image
         env:
@@ -91,8 +81,6 @@ jobs:
           DIGEST: ${{ steps.build.outputs.digest }}
         run: cosign sign --yes "${IMAGE}@${DIGEST}"
 
-      # Proves the signature is attached and discoverable by anyone pulling
-      # the image, not just that the signing command exited 0.
       - name: Verify the image signature
         env:
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
