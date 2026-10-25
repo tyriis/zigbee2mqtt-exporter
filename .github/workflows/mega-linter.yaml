@@ -3,6 +3,8 @@ name: MegaLinter
 
 on:
   push:
+    branches:
+      - "**"
   workflow_dispatch:
 
 jobs:
