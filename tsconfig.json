@@ -1,16 +1,22 @@
 {
   "compilerOptions": {
-    "rootDirs": ["src"],
+    "target": "ES2025",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "paths": {
+      "#root/*": ["./src/*"]
+    },
+    "rootDir": "src",
     "outDir": "dist",
-    "lib": ["es2020"],
-    "target": "es2020",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "strict": true,
     "esModuleInterop": true,
     "types": ["node"],
-    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
     "noImplicitAny": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "src/**/*.spec.ts"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }

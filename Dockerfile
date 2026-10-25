@@ -1,30 +1,34 @@
-# Multi stage build
-#
-# npm run build
-FROM node:24.22.1-alpine AS build
+FROM node:24.22.1-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 AS build
 
 WORKDIR /app
 
-COPY . .
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN PNPM_VERSION=$(node -p 'require("./package.json").packageManager.split("@")[1]') \
+  && npm install -g "pnpm@${PNPM_VERSION}"
+RUN pnpm install --frozen-lockfile
 
-RUN npm ci
-RUN npm run build
+COPY tsconfig.json tsconfig.build.json ./
+COPY src ./src
+RUN pnpm build
 
-# Actual build
-FROM node:24.22.1-alpine
-
-COPY --from=build /app/dist /app/dist
+FROM node:24.22.1-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53
 
 WORKDIR /app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json
-# are copied where available (npm@5+)
-ADD package*.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN PNPM_VERSION=$(node -p 'require("./package.json").packageManager.split("@")[1]') \
+  && npm install -g "pnpm@${PNPM_VERSION}"
+RUN pnpm install --prod --frozen-lockfile && pnpm store prune
 
-RUN npm ci --production
+COPY --from=build /app/dist ./dist
 
-# switch to user node (uid=1000)
+LABEL org.opencontainers.image.source="https://github.com/tyriis/zigbee2mqtt-exporter" \
+      org.opencontainers.image.description="Prometheus exporter for Zigbee2MQTT device last-seen times" \
+      org.opencontainers.image.licenses="MIT"
+
 USER node
 
-CMD [ "npm", "run", "service"]
+ENV NODE_ENV=production
+EXPOSE 3000
+
+CMD ["node", "dist/index.js"]

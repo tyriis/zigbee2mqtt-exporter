@@ -1,5 +1,7 @@
-.vscode
-node_modules
-.editorconfig
-.eslintrc.js
-.prettierrc
+*
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!tsconfig.json
+!tsconfig.build.json
+!src

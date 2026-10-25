@@ -5,13 +5,38 @@ default_stages:
   - push
 
 repos:
-  - repo: https://github.com/tyriis/pre-commit-npm
-    rev: v0.2
+  # Local hooks instead of tyriis/pre-commit-npm, which is hard-wired to npm,
+  # and instead of mirrors-prettier, whose pinned prettier drifts from the one
+  # in package.json and reformats files the repo's own prettier disagrees with.
+  - repo: local
     hooks:
-      - id: npm-run-lint
+      - id: prettier
+        name: prettier
+        entry: prettier --write
+        language: node
+        additional_dependencies:
+          - prettier@3.9.10
+        types_or:
+          - javascript
+          - jsx
+          - ts
+          - tsx
+          - json
+          - yaml
+          - markdown
+          - css
+      - id: lint
+        name: pnpm lint
+        entry: pnpm run lint
+        language: system
         files: \.ts$
-        types:
-          - file
+        pass_filenames: false
+      - id: test
+        name: pnpm test
+        entry: pnpm test
+        language: system
+        files: \.ts$
+        pass_filenames: false
   - repo: https://github.com/thlorenz/doctoc
     rev: v2.5.0
     hooks:
@@ -73,13 +98,3 @@ repos:
         args:
           - --config
           - .markdownlint.yaml
-
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
-    hooks:
-      - id: prettier
-        args:
-          - --ignore-path
-          - .prettierignore
-          - --config
-          - .prettierrc.yaml
