@@ -303,7 +303,7 @@ hand, and are recorded under "Payload facts" above.
   production deps only, runs `node dist/index.js` as user `node`. Still
   `node:24.22.1-alpine`.
 - `README.md`: purpose, env vars, endpoints, dev commands, known behaviour.
-- Version `0.2.7` → `0.3.0`.
+- Version `0.2.7` → `0.4.0` (the `v0.3.0` tag already exists).
 
 ## CI and image publishing
 
@@ -365,7 +365,7 @@ New `.github/workflows/ci.yaml`:
     devices. Known cost, documented in the README: any non-2xx marks the series
     stale and restarts the alert's `for: 10m` timer, and nothing in the rule set
     alerts on the exporter itself being down.
-5. `0.3.0` — internal restructure and bug fixes, no new capability.
+5. `0.4.0` — internal restructure and bug fixes, no new capability.
 6. `@types/node` stays on 24.x while the runtime is Node 24.
 7. Multi-arch `amd64,arm64` publishing — Home Assistant users run both, and
     the build is cheap.
