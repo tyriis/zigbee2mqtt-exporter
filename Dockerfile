@@ -22,6 +22,10 @@ RUN pnpm install --prod --frozen-lockfile && pnpm store prune
 
 COPY --from=build /app/dist ./dist
 
+LABEL org.opencontainers.image.source="https://github.com/tyriis/zigbee2mqtt-exporter" \
+      org.opencontainers.image.description="Prometheus exporter for Zigbee2MQTT device last-seen times" \
+      org.opencontainers.image.licenses="MIT"
+
 USER node
 
 ENV NODE_ENV=production

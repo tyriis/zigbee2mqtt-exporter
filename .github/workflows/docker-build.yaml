@@ -67,6 +67,10 @@ jobs:
           cache-to: type=gha,mode=max,scope=buildkit
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          annotations: |
+            index:org.opencontainers.image.source=https://github.com/tyriis/zigbee2mqtt-exporter
+            index:org.opencontainers.image.description=Prometheus exporter for Zigbee2MQTT device last-seen times
+            index:org.opencontainers.image.licenses=MIT
 
       # https://github.com/marketplace/actions/cosign-installer
       - name: Setup cosign
