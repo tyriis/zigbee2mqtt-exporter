@@ -116,7 +116,7 @@ Layers, one direction only: `http -> infrastructure -> application -> domain`.
 may import `application` and `domain`. `http` wires everything. Nothing imports
 `http`.
 
-```
+```text
 src/
   domain/
     device.ts                       # Device, COORDINATOR_NAME, lastSeenSeconds()
@@ -156,7 +156,7 @@ Supporting types:
 
 `createLastSeenCollector()` is the heart, pure and synchronous:
 
-```
+```text
 collector.handle({ topic, payload }) ->
   | { status: "collecting" }
   | { status: "complete", lastSeen: LastSeen }
@@ -176,32 +176,32 @@ Questions the design left open, and the call made on each. Every one is
 asserted by a test.
 
 1. **Device message with no usable `last_seen`** (Zigbee2MQTT publishes one
-   only when `advanced.last_seen` is enabled; `home-ops` sets
-   `ZIGBEE2MQTT_CONFIG_ADVANCED_LAST_SEEN: ISO_8601`, so it is on in
-   production, but a device that has never reported since start can still send
-   a state message without it). The device counts as reported — otherwise a
-   peer misconfiguration would turn every scrape into a deadline failure — but
-   its sample is omitted from the exposition and a warning names the device.
-   `NaN` is never emitted: it parses cleanly, compares false against the alert
-   threshold, and silently disables `DeviceNotSeen` for that device while the
-   scrape stays green.
+    only when `advanced.last_seen` is enabled; `home-ops` sets
+    `ZIGBEE2MQTT_CONFIG_ADVANCED_LAST_SEEN: ISO_8601`, so it is on in
+    production, but a device that has never reported since start can still send
+    a state message without it). The device counts as reported — otherwise a
+    peer misconfiguration would turn every scrape into a deadline failure — but
+    its sample is omitted from the exposition and a warning names the device.
+    `NaN` is never emitted: it parses cleanly, compares false against the alert
+    threshold, and silently disables `DeviceNotSeen` for that device while the
+    scrape stays green.
 2. **Malformed frame**: parsed defensively, logged at `warn`, ignored. It does
-   not settle the scrape; the deadline remains the backstop.
+    not settle the scrape; the deadline remains the backstop.
 3. **Socket closes before completion** (Zigbee2MQTT restarting): settles as
-   `source-error` → `500`. A reachable-but-vanished source is a failure, not
-   the quiet-device case the deadline exists for. Today this hangs.
+    `source-error` → `500`. A reachable-but-vanished source is a failure, not
+    the quiet-device case the deadline exists for. Today this hangs.
 4. **Second `bridge/devices` mid-scrape**: reconciled, not reset — timestamps
-   are kept for devices still listed, new devices are added, removed devices
-   dropped, and completion is recomputed over the new expected set. A reset
-   would turn a nearly complete scrape into a timeout whenever a device joins.
+    are kept for devices still listed, new devices are added, removed devices
+    dropped, and completion is recomputed over the new expected set. A reset
+    would turn a nearly complete scrape into a timeout whenever a device joins.
 5. **Failure channel**: `CollectResult` above; the route maps `timeout` to
-   `504` and `source-error` to `500`. `SCRAPE_DEADLINE_MS` flows config →
-   source factory → adapter, so the port stays free of configuration.
+    `504` and `source-error` to `500`. `SCRAPE_DEADLINE_MS` flows config →
+    source factory → adapter, so the port stays free of configuration.
 6. **Logging from the adapter**: injected `Logger` port, defaulted in
-   `index.ts` to `console.warn`/`console.error`. No direct `pino` import.
+    `index.ts` to `console.warn`/`console.error`. No direct `pino` import.
 7. **Pre-commit lint hook**: `tyriis/pre-commit-npm` runs `npm run lint` and
-   cannot be repointed, so it is replaced with `repo: local` hooks running
-   `pnpm run lint` and `pnpm test`. The other hook repos stay.
+    cannot be repointed, so it is replaced with `repo: local` hooks running
+    `pnpm run lint` and `pnpm test`. The other hook repos stay.
 
 ## Bug fixes included
 
@@ -212,7 +212,7 @@ with a regression test.
 | --- | --- | --- |
 | B1 | After a socket error the code sends 500 but never settles; a later completing message calls `res.send` again → `ERR_HTTP_HEADERS_SENT`. | Single settlement guard; the request is answered exactly once. |
 | B2 | Error path never calls `ws.close()`; the socket and its listeners leak until the peer goes away. | Close in `finally` on every exit path. |
-| B3 | No deadline. A device that never reports holds the request until Prometheus' 15s `scrapeTimeout` fails the whole scrape, losing every device, not just the stuck one. | `SCRAPE_DEADLINE_MS`, default 10000 (below the 15s timeout), answer `504` and close the socket. |
+| B3 | No deadline. A device that never reports holds the request until Prometheus' 15s `scrapeTimeout` fails the whole scrape, so every device is lost. | `SCRAPE_DEADLINE_MS`, default 10000, answers `504` and closes the socket. |
 | B4 | `JSON.parse` inside the `message` handler throws on a malformed frame → uncaught exception, process exits. | Defensive parse; malformed frames are logged and ignored. |
 | B5 | Label values are interpolated raw; a friendly name containing `"`, `\` or a newline produces invalid exposition. | Escape `\`, `"`, `\n` per the text format. |
 | B6 | Body has no trailing newline; the text format requires the last line to end with LF. | Append `\n`. |
@@ -232,27 +232,27 @@ Preserved, and asserted by tests:
 
 1. Body shape, after the B5/B6 fixes:
 
-   ```
-   # HELP zigbee2mqtt_last_seen Device last seen in seconds
-   # TYPE zigbee2mqtt_last_seen gauge
-   zigbee2mqtt_last_seen{device="lamp"} 12.345
-   ```
+    ```text
+    # HELP zigbee2mqtt_last_seen Device last seen in seconds
+    # TYPE zigbee2mqtt_last_seen gauge
+    zigbee2mqtt_last_seen{device="lamp"} 12.345
+    ```
 
-   Help/type lines first, then one sample per device in insertion order,
-   seconds as `(now - last_seen) / 1000`, terminated by a newline.
+    Help/type lines first, then one sample per device in insertion order,
+    seconds as `(now - last_seen) / 1000`, terminated by a newline.
 2. `Content-Type: text/plain` (Fastify adds `; charset=utf-8`).
 3. `Coordinator` never appears in output.
 4. Device messages arriving before `bridge/devices` are buffered and replayed
-   once the seed lands, rather than dropped as today. The replay order is not
-   contractual, and dropping a state message silently loses a device's
-   timestamp.
+    once the seed lands, rather than dropped as today. The replay order is not
+    contractual, and dropping a state message silently loses a device's
+    timestamp.
 5. Source failure before completion yields `500 Internal Server Error`, as
-   does a socket closed before completion; a deadline expiry yields `504`; a
-   payload that yields no devices is a valid `200` with just the header lines.
+    does a socket closed before completion; a deadline expiry yields `504`; a
+    payload that yields no devices is a valid `200` with just the header lines.
 6. `PORT` defaults to 3000; `ZIGBEE2MQTT_WS` defaults to
-   `ws://127.0.0.1:8080/api`; `SCRAPE_DEADLINE_MS` defaults to 10000. `PORT`
-   is a TCP port number; the accidental unix-socket-path support Express gave
-   `PORT` is dropped and noted in the README.
+    `ws://127.0.0.1:8080/api`; `SCRAPE_DEADLINE_MS` defaults to 10000. `PORT`
+    is a TCP port number; the accidental unix-socket-path support Express gave
+    `PORT` is dropped and noted in the README.
 
 ## Testing
 
@@ -262,10 +262,10 @@ never touch the network.
 | Test file | Covers |
 | --- | --- |
 | `domain/device.test.ts` | seconds math, sub-second values, clock skew |
-| `application/last-seen-collector.test.ts` | seed filtering, pre-seed messages ignored, duplicate reports, completion, re-seed, unknown topics, bad payload shape (B8) |
+| `application/last-seen-collector.test.ts` | seed filtering, pre-seed buffering, duplicate reports, completion, re-seed, unknown topics, bad payload shape (B8) |
 | `infrastructure/message-parsing.test.ts` | valid frame, malformed JSON, non-object frames (B4) |
 | `infrastructure/prometheus.test.ts` | exact body, empty snapshot, escaping (B5), trailing newline (B6) |
-| `infrastructure/z2m-websocket-source.test.ts` | fake socket: resolve on completion, close exactly once, single settlement after error (B1), socket closed on error (B2), deadline → timeout result (B3), close before completion → source error (B11), malformed frame ignored (B4) |
+| `infrastructure/z2m-websocket-source.test.ts` | fake socket: resolve on completion, one settlement per scrape (B1), close exactly once (B2), deadline → timeout (B3), close before completion → error (B11), malformed frame ignored (B4) |
 | `http/metrics-route.test.ts` | `app.inject()` 200 body/type, 500 on failure, 504 on deadline |
 | `config.test.ts` | defaults, overrides, invalid port, invalid URL (B7) |
 
@@ -343,32 +343,32 @@ New `.github/workflows/ci.yaml`:
 ## Migration steps
 
 1. Tooling scaffold: package.json, tsconfig, eslint/prettier/vitest configs,
-   mise, pnpm lockfile; delete `.eslintrc.js` and `package-lock.json`.
+    mise, pnpm lockfile; delete `.eslintrc.js` and `package-lock.json`.
 2. `domain` + `application` with their tests.
 3. `infrastructure` (parsing, adapter, formatter) with their tests.
 4. `http`, `config`, `app`, `index` with tests; delete `src/app.ts` and
-   `src/server.ts`.
+    `src/server.ts`.
 5. CI workflows, Dockerfile, pre-commit, README, version bump.
 6. Verify: `pnpm lint`, `pnpm typecheck`, `pnpm test:coverage` at 100%,
-   `pnpm build`, `docker build`, and a side-by-side `/metrics` compare against
-   v0.2.7 output for the same fixture.
+    `pnpm build`, `docker build`, and a side-by-side `/metrics` compare against
+    v0.2.7 output for the same fixture.
 
 ## Decisions I made (reject any)
 
 1. TypeScript 6.0.3 rather than 7.0.2 — toolchain compatibility.
 2. Pre-commit stays, lefthook is not added — two hook managers conflict.
 3. No broker or network dependency anywhere in the suite — the tests fake the
-   socket, so CI and local runs behave identically.
+    socket, so CI and local runs behave identically.
 4. Deadline answers `504` rather than a partial or empty `200`: when the socket
-   is wedged there is nothing honest to return, and a `200` carrying only the
-   HELP/TYPE lines would report the exporter as healthy while exporting no
-   devices. Known cost, documented in the README: any non-2xx marks the series
-   stale and restarts the alert's `for: 10m` timer, and nothing in the rule set
-   alerts on the exporter itself being down.
+    is wedged there is nothing honest to return, and a `200` carrying only the
+    HELP/TYPE lines would report the exporter as healthy while exporting no
+    devices. Known cost, documented in the README: any non-2xx marks the series
+    stale and restarts the alert's `for: 10m` timer, and nothing in the rule set
+    alerts on the exporter itself being down.
 5. `0.3.0` — internal restructure and bug fixes, no new capability.
 6. `@types/node` stays on 24.x while the runtime is Node 24.
 7. Multi-arch `amd64,arm64` publishing — Home Assistant users run both, and
-   the build is cheap.
+    the build is cheap.
 
 ## Implementation notes (2026-10-25)
 

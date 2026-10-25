@@ -27,11 +27,11 @@ Served at `GET /metrics` on `PORT`, as
 
 ## Configuration
 
-| Variable             | Default                   | Meaning                                                                                                             |
-| -------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `PORT`               | `3000`                    | TCP port to listen on. A port number only; the unix socket path `PORT` used to accept is gone.                      |
-| `ZIGBEE2MQTT_WS`     | `ws://127.0.0.1:8080/api` | Zigbee2MQTT websocket API URL.                                                                                      |
-| `SCRAPE_DEADLINE_MS` | `10000`                   | How long one scrape may wait for devices to report, in milliseconds. Keep it below the Prometheus `scrape_timeout`. |
+| Variable             | Default                   | Meaning                                                                             |
+| -------------------- | ------------------------- | ----------------------------------------------------------------------------------- |
+| `PORT`               | `3000`                    | TCP port to listen on; port numbers only, not a socket path                         |
+| `ZIGBEE2MQTT_WS`     | `ws://127.0.0.1:8080/api` | Zigbee2MQTT websocket API URL                                                       |
+| `SCRAPE_DEADLINE_MS` | `10000`                   | Milliseconds one scrape may wait for devices, below the Prometheus `scrape_timeout` |
 
 All three are validated at startup; an invalid value stops the process with a
 clear message instead of failing on the first scrape.
