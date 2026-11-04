@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "fastify": "5.12.7",
-    "ws": "8.22.0"
+    "ws": "8.22.1"
   },
   "devDependencies": {
     "@types/node": "26.6.6",
