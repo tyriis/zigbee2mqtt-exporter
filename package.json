@@ -32,7 +32,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "fastify": "5.12.7",
+    "fastify": "5.12.8",
     "ws": "8.22.1"
   },
   "devDependencies": {
