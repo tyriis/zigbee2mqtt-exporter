@@ -15,7 +15,7 @@ repos:
         entry: prettier --write
         language: node
         additional_dependencies:
-          - prettier@3.9.10
+          - prettier@3.10.0
         types_or:
           - javascript
           - jsx
