@@ -179,8 +179,8 @@ importers:
         specifier: 5.12.8
         version: 5.12.8
       ws:
-        specifier: 8.22.2
-        version: 8.22.2
+        specifier: 8.23.0
+        version: 8.23.0
     devDependencies:
       '@types/node':
         specifier: 26.6.6
@@ -1398,8 +1398,8 @@ packages:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
 
-  ws@8.22.2:
-    resolution: {integrity: sha512-/rEZ2ejown2N5gxVTHUu9bVVC7ttu0/Tgzf5hbTOixR3Fs7mbbXgn2DbdbcKgJOmpQMtrIUWivtYuVMnp/W/yA==}
+  ws@8.23.0:
+    resolution: {integrity: sha512-wCkmX8QMOrKjgO8HW2WyDbTSGeqkocxgDzS9iR79rEAexty6/2qzilx3Ag8Tqf9ykop3irLKle0MtVn5qjVnoQ==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -2438,6 +2438,6 @@ snapshots:
 
   word-wrap@1.2.5: {}
 
-  ws@8.22.2: {}
+  ws@8.23.0: {}
 
   yocto-queue@0.1.0: {}
